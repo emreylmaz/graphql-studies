@@ -131,12 +131,20 @@ const typeDefs = `
   type Subscription {
     # User
     userCreated: User!
+    userUpdated: User!
+    userDeleted: User!
     # Event
     eventCreated: Event!
+    eventUpdated: Event!
+    eventDeleted: Event!
     # Participant
     participantAdded: Participant!
+    participantUpdated: Participant!
+    participantDeleted: Participant!
     # Location
     locationCreated: Location!
+    locationUpdated: Location!
+    locationDeleted: Location!
   }
 `;
 
@@ -195,7 +203,9 @@ const resolvers = {
                 ...events[event_index],
                 ...data
             }
-
+            pubsub.publish("eventUpdated", {
+                eventUpdated: updated_event,
+            });
             return updated_event;
         },
         deleteEvent: (parent, { id }) => {
@@ -208,7 +218,9 @@ const resolvers = {
             const deleted_event = events[event_index]
 
             events.splice(event_index, 1);
-
+            pubsub.publish("eventDeleted", {
+                eventDeleted: deleted_event,
+            });
             return deleted_event;
         },
         deleteAllEvents: (parent, args) => {
@@ -242,7 +254,9 @@ const resolvers = {
                 ...locations[location_index],
                 ...data
             }
-
+            pubsub.publish("locationUpdated", {
+                locationUpadated: updated_location,
+            });
             return updated_location;
         },
         deleteLocation: (parent, { id }) => {
@@ -253,7 +267,9 @@ const resolvers = {
             }
 
             const deleted_location = locations[location_index]
-
+            pubsub.publish("locationDeleted", {
+                locationDeleted: deleted_location,
+            });
             locations.splice(location_index, 1);
 
             return deleted_location;
@@ -289,7 +305,7 @@ const resolvers = {
                 ...users[user_index],
                 ...data
             }
-
+            pubsub.publish("userUpdated", { userUpdated: updated_user })
             return updated_user;
         },
         deleteUser: (parent, { id }) => {
@@ -302,7 +318,7 @@ const resolvers = {
             const deleted_user = users[user_index]
 
             users.splice(user_index, 1);
-
+            pubsub.publish("userDeleted", { userDeleted: deleted_user });
             return deleted_user;
         },
         deleteAllUsers: (parent, args) => {
@@ -336,7 +352,9 @@ const resolvers = {
                 ...participants[participant_index],
                 ...data
             }
-
+            pubsub.publish("participantUpdated", {
+                participantUpdated: updated_participant,
+            });
             return updated_participant;
         },
         deleteParticipant: (parent, { id }) => {
@@ -349,7 +367,9 @@ const resolvers = {
             const deleted_participant = participants[participant_index]
 
             participants.splice(participant_index, 1);
-
+            pubsub.publish("participantDeleted", {
+                participantDeleted: deleted_participant,
+            });
             return deleted_participant;
         },
         deleteAllParticipants: (parent, args) => {
@@ -366,21 +386,42 @@ const resolvers = {
         userCreated: {
             subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('userCreated')
         },
-
+        userUpdated: {
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('userUpdated')
+        },
+        userDeleted: {
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('userDeleted')
+        },
         // Event
         eventCreated: {
             subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('eventCreated')
         },
-
+        eventUpdated: {
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('eventUpdated')
+        },
+        eventDeleted: {
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('eventDeleted')
+        },
         // Location
         locationCreated: {
             subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('locationCreated')
         },
-
+        locationUpdated: {
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('locationUpdated')
+        },
+        locationDeleted: {
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('locationDeleted')
+        },
         // Participant
         participantAdded: {
             subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('participantAdded')
-        }
+        },
+        participantUpdated: {
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('participantUpdated')
+        },
+        participantDeleted: {
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('participantDeleted')
+        },
     }
 };
 
