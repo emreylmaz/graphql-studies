@@ -1,46 +1,11 @@
-const { ApolloServer, gql } = require('apollo-server');
-const { ApolloServerPluginLandingPageGraphQLPlayground } = require('apollo-server-core');
+const { GraphQLServer, PubSub, withFilter } = require('graphql-yoga');
+
+const { nanoid } = require('nanoid');
+const pubsub = require('./pubsub');
 
 const { events, locations, users, participants } = require('./data');
-const { nanoid } = require('nanoid');
 
-const typeDefs = gql`
-    # User
-    type User {
-        id: ID!
-        username: String!
-        email: String!
-        events: [Event!]!
-    }
-    input addUserInput {
-        username: String!
-        email: String!
-    }
-    input updateUserInput {
-        username: String
-        email: String
-    }
-    # Location
-    type Location {
-        id: ID!
-        name: String!
-        desc: String!
-        lat: Float!
-        lng: Float!
-    }
-    input addLocationInput {
-        name: String!
-        desc: String!
-        lat: Float!
-        lng: Float!
-    }
-    input updateLocationInput {
-        name: String
-        desc: String
-        lat: Float
-        lng: Float
-    }
-    
+const typeDefs = `
     # Event
     type Event {
         id: ID!
@@ -73,6 +38,41 @@ const typeDefs = gql`
         location_id: ID
         user_id: ID
     }
+    # Location
+    type Location {
+        id: ID!
+        name: String!
+        desc: String!
+        lat: Float!
+        lng: Float!
+    }
+    input addLocationInput {
+        name: String!
+        desc: String!
+        lat: Float!
+        lng: Float!
+    }
+    input updateLocationInput {
+        name: String
+        desc: String
+        lat: Float
+        lng: Float
+    }
+    # User
+    type User {
+        id: ID!
+        username: String!
+        email: String!
+        events: [Event!]!
+    }
+    input addUserInput {
+        username: String!
+        email: String!
+    }
+    input updateUserInput {
+        username: String
+        email: String
+    }
     # Participant
     type Participant {
         id: ID!
@@ -87,47 +87,57 @@ const typeDefs = gql`
         user_id: ID
         event_id: ID
     }
-    type Query {
-        # Event
-        events: [Event!]!
-        event(id: ID!): Event!
-        # Location
-        locations: [Location!]!
-        location(id: ID!): Location!
-        # User
-        users: [User!]!
-        user(id: ID!): User!
-        # Participant
-        participants: [Participant!]!
-        participant(id: ID!): Participant!
-    }
+  type Query {
+    # Event
+    events: [Event!]!
+    event(id: ID!): Event!
+    # Location
+    locations: [Location!]!
+    location(id: ID!): Location!
+    # User
+    users: [User!]!
+    user(id: ID!): User!
+    # Participant
+    participants: [Participant!]!
+    participant(id: ID!): Participant!
+  }
     # Delete All Output
     type DeleteAllOutput {
         count: Int!
     }
-    type Mutation {
-        # Event
-        addEvent(data: addEventInput!): Event!
-        updateEvent(id: ID!, data: updateEventInput!): Event!
-        deleteEvent(id: ID!): Event!
-        deleteAllEvents: DeleteAllOutput!
-        # Location
-        addLocation(data: addLocationInput!): Location!
-        updateLocation(id: ID!, data: updateLocationInput!): Location!
-        deleteLocation(id: ID!): Location!
-        deleteAllLocations: DeleteAllOutput!
-        # User
-        addUser(data: addUserInput!): User!
-        updateUser(id: ID!, data: updateUserInput!): User!
-        deleteUser(id: ID!): User!
-        deleteAllUsers: DeleteAllOutput!
-
-        # Participant
-        addParticipant(data: addParticipantInput!): Participant!
-        updateParticipant(id: ID!, data: updateParticipantInput!): Participant!
-        deleteParticipant(id: ID!): Participant!
-        deleteAllParticipants: DeleteAllOutput!
-    }
+  type Mutation {
+      # Event
+      addEvent(data: addEventInput!): Event!
+      updateEvent(id: ID!, data: updateEventInput!): Event!
+      deleteEvent(id: ID!): Event!
+      deleteAllEvents: DeleteAllOutput!
+      # Location
+      addLocation(data: addLocationInput!): Location!
+      updateLocation(id: ID!, data: updateLocationInput!): Location!
+      deleteLocation(id: ID!): Location!
+      deleteAllLocations: DeleteAllOutput!
+      # User
+      addUser(data: addUserInput!): User!
+      updateUser(id: ID!, data: updateUserInput!): User!
+      deleteUser(id: ID!): User!
+      deleteAllUsers: DeleteAllOutput!
+      
+      # Participant
+      addParticipant(data: addParticipantInput!): Participant!
+      updateParticipant(id: ID!, data: updateParticipantInput!): Participant!
+      deleteParticipant(id: ID!): Participant!
+      deleteAllParticipants: DeleteAllOutput!
+  }
+  type Subscription {
+    # User
+    userCreated: User!
+    # Event
+    eventCreated: Event!
+    # Participant
+    participantAdded: Participant!
+    # Location
+    locationCreated: Location!
+  }
 `;
 
 const resolvers = {
@@ -163,13 +173,14 @@ const resolvers = {
 
     Mutation: {
         // Event
-        addEvent: (parent, { data }) => {
+        addEvent: (parent, { data }, { pubsub }) => {
             const event = {
                 id: nanoid(),
                 ...data
             }
 
             events.push(event);
+            pubsub.publish('eventCreated', { eventCreated: event })
 
             return event;
         },
@@ -209,13 +220,14 @@ const resolvers = {
         },
 
         // Location
-        addLocation: (parent, { data }) => {
+        addLocation: (parent, { data }, { pubsub }) => {
             const location = {
                 id: nanoid(),
                 ...data
             }
 
             locations.push(location);
+            pubsub.publish('locationCreated', { locationCreated: location })
 
             return location;
         },
@@ -255,13 +267,14 @@ const resolvers = {
         },
 
         // User
-        addUser: (parent, { data }) => {
+        addUser: (parent, { data }, { pubsub }) => {
             const user = {
                 id: nanoid(),
                 ...data
             }
 
             users.push(user);
+            pubsub.publish('userCreated', { userCreated: user })
 
             return user;
         },
@@ -301,13 +314,14 @@ const resolvers = {
         },
 
         // Participant
-        addParticipant: (parent, { data }) => {
+        addParticipant: (parent, { data }, { pubsub }) => {
             const participant = {
                 id: nanoid(),
                 ...data
             }
 
             participants.push(participant);
+            pubsub.publish('participantAdded', { participantAdded: participant })
 
             return participant;
         },
@@ -345,17 +359,37 @@ const resolvers = {
 
             return { count };
         }
+    },
+
+    Subscription: {
+        // User
+        userCreated: {
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('userCreated')
+        },
+
+        // Event
+        eventCreated: {
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('eventCreated')
+        },
+
+        // Location
+        locationCreated: {
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('locationCreated')
+        },
+
+        // Participant
+        participantAdded: {
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('participantAdded')
+        }
     }
 };
 
-const server = new ApolloServer({
+const server = new GraphQLServer({
     typeDefs,
     resolvers,
-    plugins: [
-        ApolloServerPluginLandingPageGraphQLPlayground({})
-    ]
+    context: {
+        pubsub
+    }
 });
 
-server.listen().then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`);
-});
+server.start(() => console.log("Server is running on localhost:4000"))
