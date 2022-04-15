@@ -1,0 +1,4 @@
+
+type DeleteAllOutput{
+    count:Int!
+}
