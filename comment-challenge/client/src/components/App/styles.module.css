@@ -4,7 +4,17 @@
 
 .content{
     background-color: aliceblue;
-    padding: 24px;
-    margin: 24px;
+    /*padding: 24px;*/
+    /*margin: 24px;*/
     border: solid 4px bisque;
+}
+
+.headerMenu{
+    background: none;
+    border: none;
+}
+
+.menuItem{
+    font-weight: bold;
+    font-size: 16px;
 }
