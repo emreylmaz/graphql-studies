@@ -24,15 +24,18 @@ type User{
     id:ID!
     fullName:String!
     age:Int!
+    profile_photo:String
     posts:[Post!]!
     comments:[Comment!]!
 }
 input CreateUserInput{
     fullName:String!
+    profile_photo:String
     age:Int!
 }
 
 input UpdateUserInput{
     fullName:String
+    profile_photo:String
     age:Int
 }
