@@ -7,6 +7,7 @@ import {
 import styles from "./styles.module.css";
 import Home from "pages/Home";
 import NewPost from "pages/NewPost";
+import Post from "pages/Post";
 import HeaderMenu from "./HeaderMenu";
 
 
@@ -19,6 +20,7 @@ function App() {
                     <div className={styles.content} >
                     <Switch>
                         <Route path="/new" component={NewPost} />
+                        <Route path="/post/:id" component={Post} />
                         <Route path="/" component={Home} />
                     </Switch>
                     </div>
