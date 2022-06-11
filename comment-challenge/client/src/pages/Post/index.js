@@ -6,6 +6,7 @@ import {GET_POST} from "./queries";
 import Loading from "components/Loading";
 
 import {Typography,Image} from "antd";
+import Comments from "./Comments";
 
 const {Title} = Typography;
 
@@ -36,6 +37,9 @@ function Post() {
             <Title level={3}>{post.title}</Title>
             <Image src={post.cover} alt="cover" />
             <div className={styles.description}>{post.description}</div>
+
+
+            <Comments post_id={id}/>
         </div>
     );
 }
