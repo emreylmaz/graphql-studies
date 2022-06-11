@@ -15,7 +15,7 @@ function App() {
     return (
         <div className={styles.container}>
             <Row justify="center">
-                <Col span={14} >
+                <Col span={14}  className={styles.col}>
                     <HeaderMenu />
                     <div className={styles.content} >
                     <Switch>

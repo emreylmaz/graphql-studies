@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './styles.module.css';
 import {useParams} from "react-router-dom";
 import {useQuery} from "@apollo/client";
 import {GET_POST} from "./queries";
@@ -34,7 +35,7 @@ function Post() {
         <div>
             <Title level={3}>{post.title}</Title>
             <Image src={post.cover} alt="cover" />
-            <p>{post.description}</p>
+            <div className={styles.description}>{post.description}</div>
         </div>
     );
 }
