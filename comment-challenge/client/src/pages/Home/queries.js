@@ -5,3 +5,10 @@ export const GET_POSTS = gql`
         posts{id title short_description user{profile_photo}}
     }
 `;
+
+export const POSTS_SUBSCRIPTION = gql`
+    subscription{
+        postCreated{id title short_description user{profile_photo}}
+    }
+`;
+

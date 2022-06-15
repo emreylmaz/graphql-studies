@@ -1,4 +1,5 @@
 
 type DeleteAllOutput{
     count:Int!
+    posts: Post!
 }

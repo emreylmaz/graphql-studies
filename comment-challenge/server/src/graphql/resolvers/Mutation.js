@@ -1,4 +1,5 @@
 import {nanoid} from 'nanoid';
+import pubsub from "../../pubsub";
 
 export const Mutation = {
     //User
@@ -55,9 +56,13 @@ export const Mutation = {
             id: nanoid(),
             title: data.title,
             user_id: data.user_id,
+            short_description: data.short_description,
+            cover: data.cover,
+            description: data.description,
         };
-        db.posts.push(post);
+        db.posts.unshift(post);
         pubsub.publish('postCreated', { postCreated :post})
+        pubsub.publish('postCount', {postCount: db.posts.length })
         return post;
     },
     updatePost: (parent, {id, data},{pubsub, db}) => {
@@ -83,11 +88,14 @@ export const Mutation = {
 
         const deleted_post = db.posts.splice(post_index, 1);
         pubsub.publish('postDeleted', { postDeleted :deleted_post[0]})
+        pubsub.publish('postCount', {postCount: db.posts.length })
         return deleted_post[0];
     },
     deleteAllPosts: (parent, args, {db}) => {
         const length = db.posts.length;
         db.posts.splice(0, length);
+
+        pubsub.publish('postCount', {postCount: db.posts.length })
 
         return {
             count: length,

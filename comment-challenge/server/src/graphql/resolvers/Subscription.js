@@ -33,6 +33,9 @@ export const Subscription = {
         subscribe: (parent,args, {pubsub}) => pubsub.asyncIterator('postDeleted')
 
     },
+    postCount:  {
+        subscribe: (parent,args, {pubsub}) => pubsub.asyncIterator('postCount')
+    },
 
     // COMMENT
     commentCreated:  {
