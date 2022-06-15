@@ -1,19 +1,40 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Button, Comment, Divider, List} from "antd";
 import styles from "./styles.module.css";
 
 import { useLazyQuery } from '@apollo/client';
-import {GET_POST_COMMENTS} from "./queries";
+import {COMMENTS_SUBSCRIPTION, GET_POST_COMMENTS} from "./queries";
 
 function Comments({post_id}) {
     const [btnIsVisible, setBtnIsVisible] = React.useState(true);
 
 
-    const [loadComments, { loading, data }] = useLazyQuery(GET_POST_COMMENTS,{
+    const [loadComments, { called,loading, data, subscribeToMore }] = useLazyQuery(GET_POST_COMMENTS,{
         variables: {
             id:post_id,
         }
     });
+
+    useEffect(() => {
+        if (!loading && called) {
+            subscribeToMore(
+                {
+                    document: COMMENTS_SUBSCRIPTION,
+                    updateQuery: (prev, { subscriptionData }) => {
+                        if (!subscriptionData.data) return prev;
+                        const newCommentItem = subscriptionData.data.commentCreated;
+                        return {
+                            post:{
+                                ...prev.post,
+                                comments: [...prev.post.comments, newCommentItem]
+                            }
+                        }
+                    }
+                }
+            )
+        }
+    }, [loading, called, subscribeToMore]);
+
 
 
     React.useEffect(() => {
