@@ -4,9 +4,8 @@ import {useParams} from "react-router-dom";
 import {useQuery} from "@apollo/client";
 import {GET_POST} from "./queries";
 import Loading from "components/Loading";
-
-import {Typography,Image} from "antd";
 import Comments from "./Comments";
+import {Typography,Image} from "antd";
 
 const {Title} = Typography;
 
