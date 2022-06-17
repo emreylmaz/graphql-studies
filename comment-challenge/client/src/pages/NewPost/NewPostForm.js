@@ -1,15 +1,32 @@
-import {Button, Form, Input, Select} from "antd";
+import {Button, Form, Input, Select,message} from "antd";
 import styles from "./styles.module.css";
 import React from 'react';
+import {useHistory} from "react-router-dom";
 import TextArea from "antd/es/input/TextArea";
-import {useQuery} from "@apollo/client";
-import {GET_USERS} from "./queries";
+import {useQuery, useMutation} from "@apollo/client";
+import {GET_USERS, NEW_POST_MUTATION} from "./queries";
 const {Option} = Select;
 
 function NewPostForm() {
+    const history = useHistory();
+
+    const [savePost,{loading}] = useMutation(NEW_POST_MUTATION);
 
     const {data:users_data, loading:get_users_loading} = useQuery(GET_USERS);
 
+
+    const handleSubmit = async (values) => {
+        try {
+            await savePost({variables:{data: values}});
+
+            message.success('Post created successfully');
+            history.push("/");
+        }catch (e){
+            console.log(e)
+
+            message.error('Post not saved!');
+        }
+    }
 
 
     return (
@@ -19,42 +36,44 @@ function NewPostForm() {
                 initialValues={{
                     remember: true,
                 }}
-                //onFinish={onFinish}
+                onFinish={handleSubmit}
                 //onFinishFailed={onFinishFailed}
                 autoComplete="off"
             >
                 <Form.Item
-                    name="Title"
+                    name="title"
+                    rules={[{required: true, message: 'Please input your title!'}]}
                 >
-                    <Input  size="large" placeholder="Title" />
+                    <Input  disabled={loading} size="large" placeholder="Title" />
                 </Form.Item>
 
                 <Form.Item
 
-                    name="shortDescription"
+
+                    name="short_description"
                 >
-                    <Input size="large" placeholder="Short Description" />
-
-                </Form.Item>
-
-                <Form.Item
-
-                    name="Description"
-                >
-                    <TextArea size="large" placeholder="Description" />
+                    <Input disabled={loading} size="large" placeholder="Short Description" />
 
                 </Form.Item>
 
                 <Form.Item
 
-                    name="Cover"
+                    name="description"
                 >
-                    <Input size="large" placeholder="Cover" />
+                    <TextArea disabled={loading} size="large" placeholder="Description" />
 
                 </Form.Item>
 
                 <Form.Item
-                    name="user"
+
+                    name="cover"
+                >
+                    <Input disabled={loading} size="large" placeholder="Cover" />
+
+                </Form.Item>
+
+                <Form.Item
+                    name="user_id"
                     rules={[
                         {
                             required: true,
@@ -63,7 +82,7 @@ function NewPostForm() {
                     ]}
                 >
                     <Select
-                        disabled={get_users_loading}
+                        disabled={get_users_loading || loading}
                         loading={get_users_loading}
                         placeholder="Select your user"
                         size="large"
@@ -78,7 +97,7 @@ function NewPostForm() {
 
 
                 <Form.Item  className={styles.buttons}>
-                    <Button size="large" type="primary" htmlType="submit">
+                    <Button disabled={loading} size="large" type="primary" htmlType="submit">
                         Submit
                     </Button>
                 </Form.Item>

@@ -9,3 +9,12 @@ export const GET_USERS = gql`
         }
     }
 `;
+
+export const NEW_POST_MUTATION = gql`
+mutation addNewPost( $data:CreatePostInput!) {
+    createPost(data: $data ) {
+        id
+        title
+    }
+ }
+`;
