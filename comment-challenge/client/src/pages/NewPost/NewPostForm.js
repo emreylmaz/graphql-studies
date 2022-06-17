@@ -1,10 +1,17 @@
 import {Button, Form, Input, Select} from "antd";
-
+import styles from "./styles.module.css";
 import React from 'react';
 import TextArea from "antd/es/input/TextArea";
+import {useQuery} from "@apollo/client";
+import {GET_USERS} from "./queries";
 const {Option} = Select;
 
 function NewPostForm() {
+
+    const {data:users_data, loading:get_users_loading} = useQuery(GET_USERS);
+
+
+
     return (
         <div>
             <Form
@@ -56,20 +63,22 @@ function NewPostForm() {
                     ]}
                 >
                     <Select
+                        disabled={get_users_loading}
+                        loading={get_users_loading}
                         placeholder="Select your user"
                         size="large"
                         allowClear
                     >
-                        <Option value="male">male</Option>
-                        <Option value="female">female</Option>
-                        <Option value="other">other</Option>
+                        {
+                            users_data && users_data.users.map((item) => <Option key={item.id} value={item.id}>{item.fullName}</Option>)
+                        }
                     </Select>
                 </Form.Item>
 
 
 
-                <Form.Item>
-                    <Button type="primary" htmlType="submit">
+                <Form.Item  className={styles.buttons}>
+                    <Button size="large" type="primary" htmlType="submit">
                         Submit
                     </Button>
                 </Form.Item>

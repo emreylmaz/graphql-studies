@@ -25,3 +25,7 @@ body {
 .ant-menu-horizontal > .ant-menu-item a {
   color: #f8f8f8;
 }
+.ant-form-item
+{
+  margin-bottom: 12px ;
+}
