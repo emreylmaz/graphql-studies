@@ -1,16 +1,30 @@
-import React from 'react';
-import {Button, Form, Input, Row, Select,Col} from "antd";
+import {useRef} from 'react';
+import {Button, Form, Input, Select, message} from "antd";
 import styles from "./styles.module.css";
-import {GET_USERS} from "./queries";
-import {useQuery} from "@apollo/client";
+import {GET_USERS,CREATE_COMMENT_MUTATION} from "./queries";
+import {useQuery, useMutation} from "@apollo/client";
 
 const {Option} = Select;
 
-function NewCommentForm(props) {
+function NewCommentForm({post_id}) {
+    const[createComment,{loading}] = useMutation(CREATE_COMMENT_MUTATION);
     const {data:users_data, loading:get_users_loading} = useQuery(GET_USERS);
 
+    const formRef = useRef();
+
     const handleSubmit = async (values) => {
-        console.log(values);
+        try {
+            await createComment({variables:{
+                data: {...values, post_id: post_id}
+            }});
+
+            message.success('Comment add successfully');
+            formRef.current.resetFields();
+        }catch (e){
+            console.log(e)
+
+            message.error('Comment not saved!');
+        }
     }
 
     return (
@@ -18,10 +32,9 @@ function NewCommentForm(props) {
             name="basic"
             onFinish={handleSubmit}
             autoComplete="off"
+            ref={formRef}
         >
-            <Row gutter = { 24 } >
 
-                <Col span={10}>
 
                     <Form.Item
                         name="user_id"
@@ -33,7 +46,7 @@ function NewCommentForm(props) {
                         ]}
                     >
                         <Select
-                            disabled={get_users_loading }
+                            disabled={get_users_loading || loading}
                             loading={get_users_loading}
                             placeholder="Select your user"
                             size="middle"
@@ -45,22 +58,20 @@ function NewCommentForm(props) {
                         </Select>
                     </Form.Item>
 
-                </Col>
 
-                <Col span={14}>
+
+
                     <Form.Item
+                        disabled={loading}
                         name="text"
                         rules={[{required: true, message: 'Please enter a message!'}]}
                     >
                         <Input   size="middle" placeholder="Message" />
                     </Form.Item>
-                </Col>
 
 
-            </Row >
-
-            <Form.Item className = { styles.buttons } >
-            <Button size = " large " type = " hidden " htmlType = " submit " >
+            <Form.Item  className = { styles.buttons } >
+            <Button disabled={loading} size = " large " type = "primary " htmlType = " submit " >
                 Submit
             </Button >
             </Form.Item >

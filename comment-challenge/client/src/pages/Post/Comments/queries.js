@@ -9,3 +9,11 @@ export const GET_USERS = gql`
         }
     }
 `;
+
+export const CREATE_COMMENT_MUTATION = gql`
+mutation addNewComment ( $data : CreateCommentInput! ) {
+    createComment ( data : $data ) {
+        id
+    }
+}
+`;
