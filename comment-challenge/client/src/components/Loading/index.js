@@ -18,7 +18,7 @@ function Loading() {
 
     return (
         <div className={styles.loading}>
-        <Spin indicator={antIcon} />
+        <Spin delay={300} indicator={antIcon} />
         </div>
     );
 }
