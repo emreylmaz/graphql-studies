@@ -2,10 +2,11 @@ import { Divider, Button } from 'antd';
 import { Comment, List } from 'antd';
 import styles from './styles.module.css';
 import { useLazyQuery } from '@apollo/client'
-import { GET_POST_COMMENTS, COMMENTS_SUBSCRIPTIONS } from './queries';
+import { GET_POST_COMMENTS, COMMENTS_SUBSCRIPTIONS } from '../queries';
 import { useEffect, useState } from 'react';
+import NewCommentForm from "./NewCommentForm";
 
-function Comments({ post_id }) {
+function CommentsList({ post_id }) {
     const [btnIsVisible, setBtnIsVisible] = useState(true);
 
     const [loadComments, { called, loading, data, subscribeToMore }] = useLazyQuery(GET_POST_COMMENTS, {
@@ -44,7 +45,7 @@ function Comments({ post_id }) {
 
     return (
         <>
-            <Divider>Comments</Divider>
+            <Divider orientation="left" >Comments</Divider>
             <div className={styles.showCommentsBtnContainer}>
                 {
                     btnIsVisible && <Button onClick={() => loadComments()}>Show Comments</Button>
@@ -52,26 +53,29 @@ function Comments({ post_id }) {
             </div>
             {
                 !loading && data &&
-                // <div>YORUMLAR</div>
-                <List
-                    className="comment-list"
-                    // header={`${data.length} replies`}
-                    itemLayout="horizontal"
-                    dataSource={data.post.comments}
-                    renderItem={item => (
-                        <li>
-                            <Comment
-                                author={item.user.fullName}
-                                avatar={item.user.profile_photo}
-                                content={item.text}
-                            />
-                        </li>
-                    )}
-                />
+                <>
+                    <List
+                        className="comment-list"
+                        // header={`${data.length} replies`}
+                        itemLayout="horizontal"
+                        dataSource={data.post.comments}
+                        renderItem={item => (
+                            <li>
+                                <Comment
+                                    author={item.user.fullName}
+                                    avatar={item.user.profile_photo}
+                                    content={item.text}
+                                />
+                            </li>
+                        )}
+                    />
+                    <Divider orientation="left">New Comment</Divider>
+                    <NewCommentForm />
+                </>
             }
         </>
 
     )
 }
 
-export default Comments
+export default CommentsList
