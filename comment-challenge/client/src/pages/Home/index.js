@@ -12,18 +12,19 @@ function Home() {
     const { loading, error, data, subscribeToMore } = useQuery(GET_POSTS);
 
     useEffect(() => {
-    subscribeToMore({
-        document: POSTS_SUBSCRIPTION,
-        updateQuery: (prev, { subscriptionData }) => {
-            if (!subscriptionData.data) return prev;
-            const { postCreated } = subscriptionData.data;
-            return {
-                posts: [postCreated , ...prev.posts]
-            };
-        }
-    })
-
-    }, []);
+        subscribeToMore({
+            document: POSTS_SUBSCRIPTION,
+            updateQuery: (prev, { subscriptionData }) => {
+                if( !subscriptionData.data) return prev;
+                return {
+                    posts: [
+                        subscriptionData.data.postCreated,
+                        ...prev.posts
+                    ]
+                }
+            },
+        })
+    }, [subscribeToMore])
 
     if (loading){
         return <Loading/>
