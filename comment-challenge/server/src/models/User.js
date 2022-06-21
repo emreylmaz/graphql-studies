@@ -14,6 +14,12 @@ const UserSchema = new Schema({
     profile_photo:{
         type: String,
     },
+    posts: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Post',
+        },
+    ],
 });
 
 export default mongoose.model("User", UserSchema);

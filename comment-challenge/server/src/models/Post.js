@@ -12,6 +12,10 @@ const PostSchema = new Schema({
     },
     short_description: String,
     cover: String,
+    user: {
+        type:Schema.Types.ObjectId,
+        ref:'User'
+    }
 });
 
 export default mongoose.model('Post', PostSchema);
