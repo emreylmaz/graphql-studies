@@ -11,8 +11,14 @@ export const Query = {
     },
 
     // Posts
-    posts: (_,__, {db}) => db.posts,
-    post: (parent, args, {db}) => db.posts.find((post) => post.id === args.id),
+    posts: async (_, __, { _db }) => {
+        const posts = await _db.Post.find();
+        return posts;
+    },
+    post: async (_, args, { _db }) => {
+        const post = await _db.Post.findById(args.id);
+        return post;
+    },
     // CommentsList
     comments: (_,__, {db}) => db.comments,
     comment: (parent, args, {db}) => db.comments.find((comment) => comment.id === args.id),
