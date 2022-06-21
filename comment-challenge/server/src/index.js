@@ -8,6 +8,10 @@ import db from "./db";
 
 db();
 
+import User from "./models/User";
+
+
+
 //Fake data
 import data from "./data";
 
@@ -20,6 +24,9 @@ const server = new GraphQLServer(
             context: {
             pubsub,
             db: data,
+            _db: {
+                User,
+            }
             } });
 server.start(() => console.log("Server is running on localhost:4000"));
 
