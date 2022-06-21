@@ -10,6 +10,7 @@ db();
 
 import User from "./models/User";
 import Post from "./models/Post";
+import Comment from './models/Comment';
 
 
 //Fake data
@@ -27,6 +28,7 @@ const server = new GraphQLServer(
             _db: {
                 User,
                 Post,
+                Comment,
             }
             } });
 server.start(() => console.log("Server is running on localhost:4000"));

@@ -20,8 +20,14 @@ export const Query = {
         return post;
     },
     // CommentsList
-    comments: (_,__, {db}) => db.comments,
-    comment: (parent, args, {db}) => db.comments.find((comment) => comment.id === args.id),
+    comments: async (_, __, { _db }) => {
+        const comments = await _db.Comment.find();
+        return comments;
+    },
+    comment: async (_, args, { _db }) => {
+        const comment = await _db.Comment.findById(args.id);
+        return comment;
+    },
 
 }
 
