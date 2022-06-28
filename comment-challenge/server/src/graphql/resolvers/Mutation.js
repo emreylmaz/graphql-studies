@@ -1,5 +1,6 @@
 import {nanoid} from 'nanoid';
 import pubsub from "../../pubsub";
+import mongoose from "mongoose";
 
 export const Mutation = {
     //User
@@ -48,55 +49,60 @@ export const Mutation = {
         };
     },
     //Post
-    createPost: (parent, {data},{pubsub, db}) => {
-        const post = {
-            id: nanoid(),
-            title: data.title,
-            user_id: data.user_id,
-            short_description: data.short_description,
-            cover: data.cover,
-            description: data.description,
-        };
-        db.posts.unshift(post);
+    createPost: async (parent, {data},{pubsub, _db}) => {
+        const newPost = new _db.Post({
+            ...data,
+        });
+
+        const post = await newPost.save();
+
+        const user = await _db.User.findById(mongoose.Types.ObjectId(data.user));
+
+        user.posts.push(post._id);
+        user.save();
+
+        const postCount = await _db.Post.countDocuments();
+
         pubsub.publish('postCreated', { postCreated :post})
-        pubsub.publish('postCount', {postCount: db.posts.length })
+        pubsub.publish('postCount', {postCount})
         return post;
     },
-    updatePost: (parent, {id, data},{pubsub, db}) => {
-        const post_index = db.posts.findIndex(post => post.id === id);
+    updatePost: async (_, { id, data }, { pubsub, _db }) => {
+        const is_post_exist = await _db.Post.findById(id);
 
-        if (post_index === -1) {
-            throw new Error('Post not found');
+        if(!is_post_exist) {
+            throw new Error('Post not found')
         }
 
-        const updated_post = db.posts[post_index] = {
-            ...db.posts[post_index],
-            ...data,
-        };
-        pubsub.publish('postUpdated', { postUpdated :updated_post})
+        const updated_post = await _db.Post.findByIdAndUpdate(id, data, { new: true });
+
+        pubsub.publish('postUpdated', { postUpdated: updated_post })
+
         return updated_post;
     },
-    deletePost: (parent, {id},{pubsub, db}) => {
-        const post_index = db.posts.findIndex(post => post.id === id);
+    deletePost: async (_, { id }, { pubsub, _db }) => {
+        const is_post_exist = await _db.Post.findById(id)
 
-        if (post_index === -1) {
-            throw new Error('Post not found');
+        if(!is_post_exist) {
+            throw new Error("Post not found")
         }
 
-        const deleted_post = db.posts.splice(post_index, 1);
-        pubsub.publish('postDeleted', { postDeleted :deleted_post[0]})
-        pubsub.publish('postCount', {postCount: db.posts.length })
-        return deleted_post[0];
-    },
-    deleteAllPosts: (parent, args, {db}) => {
-        const length = db.posts.length;
-        db.posts.splice(0, length);
+        const postDeleted = await _db.Post.findByIdAndDelete(id);
+        const postCount = await _db.Post.countDocuments();
 
-        pubsub.publish('postCount', {postCount: db.posts.length })
+        pubsub.publish('postDeleted', { postDeleted })
+        pubsub.publish('postCount', { postCount })
+
+        return postDeleted;
+    },
+    deleteAllPosts: async (_, __, { pubsub, _db }) => {
+        const delete_posts = await _db.Post.deleteMany({});
+
+        pubsub.publish("postCount", { postCount: delete_posts.deletedCount })
 
         return {
-            count: length,
-        };
+            count: delete_posts.deletedCount,
+        }
     },
 
 

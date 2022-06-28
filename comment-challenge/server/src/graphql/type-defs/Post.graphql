@@ -13,14 +13,14 @@ input CreatePostInput{
     description:String
     short_description:String
     cover:String
-    user_id:ID!
+    user:ID!
 }
 input UpdatePostInput{
     title:String!
     description:String
     short_description:String
     cover:String
-    user_id:ID!
+    user_id:ID
 }
 
 type Query{
