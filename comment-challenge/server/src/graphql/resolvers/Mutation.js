@@ -3,51 +3,48 @@ import pubsub from "../../pubsub";
 
 export const Mutation = {
     //User
-    createUser: (parent, {data},{pubsub, db }) => {
-        const user = {
-            id: nanoid(),
-            fullName: data.fullName,
-            age: data.age,
-        };
-        db.users.push(user);
+    createUser: async (parent, {data},{pubsub, _db }) => {
+
+        const newUser = new _db.User({
+            ...data,
+        });
+
+        const user = await newUser.save();
+
         pubsub.publish('userCreated', { userCreated :user})
         return user;
     },
-    updateUser: (parent, {id, data}, {pubsub, db }) => {
-        const user_index = db.users.findIndex(user => user.id === id);
+    updateUser: async (parent, {id, data}, {pubsub, _db }) => {
+        const is_user_exist = await _db.User.findById(id);
 
-        if (user_index === -1) {
+        if (!is_user_exist) {
             throw new Error('User not found');
         }
 
-        const updated_user = db.users[user_index] = {
-            ...db.users[user_index],
-            ...data,
-        };
+        const updated_user = await _db.User.findByIdAndUpdate(id, data, {new: true});
 
         pubsub.publish('userUpdated', { userUpdated:updated_user})
 
         return updated_user;
     },
-    deleteUser: (parent, {id}, {pubsub,db}) => {
-        const user_index = db.users.findIndex(user => user.id === id);
+    deleteUser: async (parent, {id}, {pubsub,_db}) => {
+        const is_user_exist = await _db.User.findById(id);
 
-        if (user_index === -1) {
+        if (!is_user_exist) {
             throw new Error('User not found');
         }
 
-        const deleted_user = db.users.splice(user_index, 1);
+        const deleted_user = await _db.User.findByIdAndDelete(id);
 
-        pubsub.publish('userDeleted', { userDeleted:deleted_user[0]})
+        pubsub.publish('userDeleted', { userDeleted:deleted_user})
 
-        return deleted_user[0];
+        return deleted_user;
     },
-    deleteAllUsers: (parent, args, {db}) => {
-        const length = db.users.length;
-        db.users.splice(0, length);
+    deleteAllUsers: (parent, args, {_db}) => {
+        const deleted_users = _db.User.deleteMany({});
 
         return {
-            count: length,
+            count: deleted_users.deletedCount,
         };
     },
     //Post
