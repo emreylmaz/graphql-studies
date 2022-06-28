@@ -4,22 +4,20 @@
 type Comment{
     id:ID!
     text:String!
-    user_id:ID!
-    post_id:ID!
     user: User!
     post: Post!
 }
 
 input CreateCommentInput{
     text:String!
-    user_id:ID!
-    post_id:ID!
+    user:ID!
+    post:ID!
 }
 
 input UpdateCommentInput{
     text:String
-    user_id:ID
-    post_id:ID
+    user:ID
+    post:ID
 }
 
 
