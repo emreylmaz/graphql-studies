@@ -20,6 +20,12 @@ const UserSchema = new Schema({
             ref: 'Post',
         },
     ],
+    comments: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Comment',
+        }
+    ]
 });
 
 export default mongoose.model("User", UserSchema);
